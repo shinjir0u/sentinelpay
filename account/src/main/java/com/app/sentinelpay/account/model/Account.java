@@ -1,6 +1,6 @@
 package com.app.sentinelpay.account.model;
 
-import src.main.java.com.app.sentinelpay.account.model.type.AccountStatus;
+import com.app.sentinelpay.account.model.type.AccountStatus;
 import com.app.sentinelpay.user.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -24,6 +24,7 @@ public class Account {
     @Column(name = "account_number", unique = true, nullable = false)
     private String accountNumber;
 
+    @Column(precision = 19, scale = 2)
     private BigDecimal balance;
 
     @Enumerated(EnumType.STRING)
@@ -35,5 +36,34 @@ public class Account {
 
     @Version
     private Integer version;
+
+    private boolean hasInsufficientBalance(BigDecimal amount) {
+        return balance.subtract(amount).compareTo(BigDecimal.valueOf(1000)) <= 0;
+    }
+
+    private boolean isInvalidAmount(BigDecimal amount) {
+        return amount.scale() > 2 || amount.compareTo(BigDecimal.ZERO) <= 0;
+    }
+
+    public BigDecimal subtractBalance(BigDecimal amount) {
+        if (isInvalidAmount(amount))
+            throw new IllegalArgumentException("Invalid amount: transaction amount must be greater than 0 and have at most 2 decimal places.");
+
+        if (hasInsufficientBalance(amount))
+            throw new IllegalArgumentException("Insufficient balance: at least 1000 must remain in the account after transaction.");
+
+        return balance = balance.subtract(amount);
+    }
+
+    public BigDecimal addBalance(BigDecimal amount) {
+        if (isInvalidAmount(amount))
+            throw new IllegalArgumentException("Invalid amount: transaction amount must be greater than 0 and have at most 2 decimal places.");
+
+        return balance = balance.add(amount);
+    }
+
+    public boolean isAccountTerminated() {
+        return status.equals(AccountStatus.TERMINATED);
+    }
 
 }

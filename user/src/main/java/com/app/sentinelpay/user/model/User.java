@@ -1,5 +1,6 @@
 package com.app.sentinelpay.user.model;
 
+import com.app.sentinelpay.user.model.type.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

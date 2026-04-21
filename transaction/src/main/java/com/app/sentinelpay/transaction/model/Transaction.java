@@ -1,6 +1,7 @@
 package com.app.sentinelpay.transaction.model;
 
 import com.app.sentinelpay.account.model.Account;
+import com.app.sentinelpay.transaction.model.type.TransactionStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
