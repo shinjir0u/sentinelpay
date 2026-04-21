@@ -4,9 +4,11 @@ import com.app.sentinelpay.account.model.Account;
 import com.app.sentinelpay.transaction.model.type.TransactionStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -16,6 +18,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "transactions")
 public class Transaction {
 
@@ -32,13 +35,14 @@ public class Transaction {
     private Instant startDate;
 
     @Column(name = "transaction_end_date")
+    @LastModifiedDate
     private Instant endDate;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "sender_account_id")
     private Account senderAccount;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "receiver_account_id")
     private Account receiverAccount;
 
