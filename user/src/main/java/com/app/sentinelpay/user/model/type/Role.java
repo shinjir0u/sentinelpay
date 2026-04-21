@@ -1,4 +1,4 @@
-package com.app.sentinelpay.user.model;
+package com.app.sentinelpay.user.model.type;
 
 public enum Role {
     USER,
