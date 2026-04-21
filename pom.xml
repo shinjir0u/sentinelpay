@@ -5,10 +5,10 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.0</version>
+		<version>4.0.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.app</groupId>
+	<groupId>com.app.sentinelpay</groupId>
 	<artifactId>sentinelpay</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
@@ -17,20 +17,28 @@
 
 	<properties>
 		<java.version>21</java.version>
-		<project.version>0.0.1-SNAPSHOT</project.version>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
-			<!-- Manage internal module versions -->
 			<dependency>
-				<groupId>com.app.sentinalpay</groupId>
+				<groupId>com.app.sentinelpay</groupId>
 				<artifactId>user</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.app.sentinalpay</groupId>
+				<groupId>com.app.sentinelpay</groupId>
 				<artifactId>account</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.app.sentinelpay</groupId>
+				<artifactId>transaction</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.app.sentinelpay</groupId>
+				<artifactId>rest</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>
@@ -58,6 +66,8 @@
 	<modules>
 		<module>user</module>
 		<module>account</module>
+		<module>transaction</module>
+		<module>rest</module>
 	</modules>
 
 </project>
