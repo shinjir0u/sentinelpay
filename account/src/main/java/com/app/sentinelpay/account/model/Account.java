@@ -40,7 +40,7 @@ public class Account {
     private Integer version;
 
     private boolean hasInsufficientBalance(BigDecimal amount) {
-        return balance.subtract(amount).compareTo(BigDecimal.valueOf(1000)) <= 0;
+        return balance.subtract(amount).compareTo(BigDecimal.valueOf(1000)) < 0;
     }
 
     private boolean isInvalidAmount(BigDecimal amount) {

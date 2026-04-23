@@ -7,11 +7,11 @@ import com.app.sentinelpay.transaction.model.type.TransactionStatus;
 import com.app.sentinelpay.transaction.repository.TransactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.concurrent.CompletableFuture;
+import java.time.Instant;
 
 @Service
 @AllArgsConstructor
@@ -21,6 +21,8 @@ public class TransactionServiceImpl implements TransactionService {
     private final AccountRepository accountRepository;
 
     private final TransactionRepository transactionRepository;
+
+    private final TaskScheduler taskScheduler;
 
     @Override
     public String transfer(String senderAccountNumber, String receiverAccountNumber, BigDecimal amount) throws InterruptedException {
@@ -43,16 +45,21 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        return setTransactionSuccess(savedTransaction).join();
+        taskScheduler.schedule(() -> {
+            try {
+                setTransactionSuccess(savedTransaction);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }, Instant.now().plusSeconds(10));
+
+        return savedTransaction.getId().toString();
 
     }
 
-    @Async
-    private CompletableFuture<String> setTransactionSuccess(Transaction transaction) throws InterruptedException {
-        Thread.sleep(10000);
+    private void setTransactionSuccess(Transaction transaction) throws InterruptedException {
         Transaction successTransaction = transaction.toBuilder().status(TransactionStatus.SUCCESS).build();
-        String savedTransactionId = transactionRepository.save(successTransaction).getId().toString();
-        return CompletableFuture.completedFuture(savedTransactionId);
+        transactionRepository.save(successTransaction);
     }
 
 }
