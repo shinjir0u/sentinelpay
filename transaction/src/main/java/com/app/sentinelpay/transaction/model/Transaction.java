@@ -33,11 +33,11 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
-    @Column(name = "transaction_start_date")
+    @Column(name = "transaction_start_date", nullable = false, updatable = false)
     @CreatedDate
     private Instant startDate;
 
-    @Column(name = "transaction_end_date")
+    @Column(name = "transaction_end_date", nullable = false)
     @LastModifiedDate
     private Instant endDate;
 
