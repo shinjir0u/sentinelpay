@@ -7,6 +7,6 @@ import java.math.BigDecimal;
 
 public interface TransactionService {
 
-    String transfer(String senderAccountNumber, String receiverAccountNumber, BigDecimal amount);
+    String transfer(String senderAccountNumber, String receiverAccountNumber, BigDecimal amount) throws InterruptedException;
 
 }

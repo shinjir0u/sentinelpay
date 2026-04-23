@@ -7,9 +7,11 @@ import com.app.sentinelpay.transaction.model.type.TransactionStatus;
 import com.app.sentinelpay.transaction.repository.TransactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @AllArgsConstructor
@@ -21,10 +23,10 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
 
     @Override
-    public String transfer(String senderAccountId, String receiverAccountId, BigDecimal amount) {
+    public String transfer(String senderAccountNumber, String receiverAccountNumber, BigDecimal amount) throws InterruptedException {
 
-        Account senderAccount = accountRepository.findByAccountNumber(senderAccountId).orElseThrow();
-        Account receiverAccount = accountRepository.findByAccountNumber(receiverAccountId).orElseThrow();
+        Account senderAccount = accountRepository.findByAccountNumber(senderAccountNumber).orElseThrow();
+        Account receiverAccount = accountRepository.findByAccountNumber(receiverAccountNumber).orElseThrow();
 
         if (senderAccount.isAccountTerminated() || receiverAccount.isAccountTerminated())
             throw new RuntimeException("Transaction from or to an terminated account is invalid");
@@ -39,7 +41,18 @@ public class TransactionServiceImpl implements TransactionService {
                                     .status(TransactionStatus.PENDING)
                                     .build();
 
-        return transactionRepository.save(transaction).getId().toString();
+        Transaction savedTransaction = transactionRepository.save(transaction);
+
+        return setTransactionSuccess(savedTransaction).join();
+
+    }
+
+    @Async
+    private CompletableFuture<String> setTransactionSuccess(Transaction transaction) throws InterruptedException {
+        Thread.sleep(10000);
+        Transaction successTransaction = transaction.toBuilder().status(TransactionStatus.SUCCESS).build();
+        String savedTransactionId = transactionRepository.save(successTransaction).getId().toString();
+        return CompletableFuture.completedFuture(savedTransactionId);
     }
 
 }

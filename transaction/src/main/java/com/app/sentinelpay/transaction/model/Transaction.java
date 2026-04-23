@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -18,7 +19,8 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "transactions")
 public class Transaction {
 
@@ -28,6 +30,7 @@ public class Transaction {
 
     private BigDecimal amount;
 
+    @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
     @Column(name = "transaction_start_date")
