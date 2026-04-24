@@ -33,8 +33,8 @@ public class TransactionServiceImpl implements TransactionService {
         if (senderAccount.isAccountTerminated() || receiverAccount.isAccountTerminated())
             throw new RuntimeException("Transaction from or to an terminated account is invalid");
 
-        senderAccount.subtractBalance(amount);
-        receiverAccount.addBalance(amount);
+        if (!senderAccount.hasInsufficientBalance(amount))
+            throw new IllegalArgumentException("Insufficient balance: at least 1000 must remain in the account after transaction.");
 
         Transaction transaction = Transaction.builder()
                                     .senderAccount(senderAccount)
@@ -47,17 +47,26 @@ public class TransactionServiceImpl implements TransactionService {
 
         taskScheduler.schedule(() -> {
             try {
-                setTransactionSuccess(savedTransaction);
+                finalizeTransaction(savedTransaction);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-        }, Instant.now().plusSeconds(10));
+        }, Instant.now().plusSeconds(100));
 
         return savedTransaction.getId().toString();
 
     }
 
-    private void setTransactionSuccess(Transaction transaction) throws InterruptedException {
+    private void finalizeTransaction(Transaction transaction) throws InterruptedException {
+        Account senderAccount = accountRepository.findByAccountNumber(transaction.getSenderAccount().getAccountNumber()).orElseThrow();
+        Account receiverAccount = accountRepository.findByAccountNumber(transaction.getReceiverAccount().getAccountNumber()).orElseThrow();
+
+        if (senderAccount.isAccountTerminated() || receiverAccount.isAccountTerminated())
+            throw new RuntimeException("Transaction from or to an terminated account is invalid");
+
+        senderAccount.subtractBalance(transaction.getAmount());
+        receiverAccount.addBalance(transaction.getAmount());
+
         Transaction successTransaction = transaction.toBuilder().status(TransactionStatus.SUCCESS).build();
         transactionRepository.save(successTransaction);
     }

@@ -39,7 +39,7 @@ public class Account {
     @Version
     private Integer version;
 
-    private boolean hasInsufficientBalance(BigDecimal amount) {
+    public boolean hasInsufficientBalance(BigDecimal amount) {
         return balance.subtract(amount).compareTo(BigDecimal.valueOf(1000)) < 0;
     }
 
