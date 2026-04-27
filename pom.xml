@@ -17,6 +17,7 @@
 
 	<properties>
 		<java.version>21</java.version>
+		<project.version>0.0.1-SNAPSHOT</project.version>
 	</properties>
 
 	<dependencyManagement>
@@ -39,6 +40,11 @@
 			<dependency>
 				<groupId>com.app.sentinelpay</groupId>
 				<artifactId>rest</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.app.sentinelpay</groupId>
+				<artifactId>idempotencykey</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>

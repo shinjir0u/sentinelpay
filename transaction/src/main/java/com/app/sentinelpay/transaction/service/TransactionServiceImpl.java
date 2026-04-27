@@ -2,6 +2,8 @@ package com.app.sentinelpay.transaction.service;
 
 import com.app.sentinelpay.account.model.Account;
 import com.app.sentinelpay.account.repository.AccountRepository;
+import com.app.sentinelpay.idempotencyKey.model.IdempotencyKey;
+import com.app.sentinelpay.idempotencyKey.repository.IdempotencyKeyRepository;
 import com.app.sentinelpay.transaction.model.Transaction;
 import com.app.sentinelpay.transaction.model.type.TransactionStatus;
 import com.app.sentinelpay.transaction.repository.TransactionRepository;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -22,10 +26,23 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
 
+    private final IdempotencyKeyRepository idempotencyKeyRepository;
+
     private final TaskScheduler taskScheduler;
 
     @Override
-    public String transfer(String senderAccountNumber, String receiverAccountNumber, BigDecimal amount) throws InterruptedException {
+    public String transfer(String idempotencyKey, String senderAccountNumber, String receiverAccountNumber, BigDecimal amount) throws InterruptedException {
+
+        Optional<IdempotencyKey> optionalIdempotencyKey = idempotencyKeyRepository.findById(idempotencyKey);
+
+        if (optionalIdempotencyKey.isPresent()) {
+            IdempotencyKey key = optionalIdempotencyKey.get();
+
+            if (key.getExpiryDate().isBefore(Instant.now()))
+                idempotencyKeyRepository.delete(key);
+            else
+                return key.getResponse();
+        }
 
         Account senderAccount = accountRepository.findByAccountNumber(senderAccountNumber).orElseThrow();
         Account receiverAccount = accountRepository.findByAccountNumber(receiverAccountNumber).orElseThrow();
@@ -33,7 +50,7 @@ public class TransactionServiceImpl implements TransactionService {
         if (senderAccount.isAccountTerminated() || receiverAccount.isAccountTerminated())
             throw new RuntimeException("Transaction from or to an terminated account is invalid");
 
-        if (!senderAccount.hasInsufficientBalance(amount))
+        if (senderAccount.hasInsufficientBalance(amount))
             throw new IllegalArgumentException("Insufficient balance: at least 1000 must remain in the account after transaction.");
 
         Transaction transaction = Transaction.builder()
@@ -52,6 +69,14 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new RuntimeException(e);
             }
         }, Instant.now().plusSeconds(100));
+
+        IdempotencyKey processedIdempotencyKey = IdempotencyKey.builder()
+                                                    .key(idempotencyKey)
+                                                    .response(savedTransaction.getId().toString())
+                                                    .expiryDate(Instant.now().plus(24, ChronoUnit.HOURS))
+                                                    .build();
+
+        idempotencyKeyRepository.save(processedIdempotencyKey);
 
         return savedTransaction.getId().toString();
 
