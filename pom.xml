@@ -68,6 +68,7 @@
 		<module>account</module>
 		<module>transaction</module>
 		<module>rest</module>
+		<module>idempotencykey</module>
 	</modules>
 
 </project>
