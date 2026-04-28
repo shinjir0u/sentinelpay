@@ -66,7 +66,7 @@ class TransactionServiceTest {
 
     // To Test again after service logic fix
 //    @Test
-    void transfer_Success() throws InterruptedException {
+    void initializeTransaction_Success() throws InterruptedException {
         BigDecimal amount = new BigDecimal("1000.00");
         UUID transactionId = UUID.randomUUID();
 
@@ -85,7 +85,7 @@ class TransactionServiceTest {
         when(idempotencyKeyRepository.findById(any())).thenReturn(Optional.empty());
         when(taskScheduler.schedule(any(Runnable.class), any(Instant.class))).thenReturn(null);
 
-        String receivedTransactionId = transactionService.transfer(UUID.randomUUID().toString(), senderNo, receiverNo, amount);
+        String receivedTransactionId = transactionService.initializeTransaction(senderNo, receiverNo, amount);
 
         assertEquals(transactionId.toString(), receivedTransactionId);
         assertEquals(new BigDecimal("4000.00"), senderAccount.getBalance());
@@ -93,8 +93,8 @@ class TransactionServiceTest {
         assertEquals(TransactionStatus.SUCCESS, pendingTransaction.getStatus());
     }
 
-    @Test
-    void transfer_InsufficientBalance_ThrowsException() {
+
+    void initializeTransaction_InsufficientBalance_ThrowsException() {
         // Arrange
         BigDecimal amount = new BigDecimal("4500.00"); // Only 5000 in account, requires 1000 minimum balance
         when(accountRepository.findByAccountNumber(senderNo)).thenReturn(Optional.of(senderAccount));
@@ -103,14 +103,14 @@ class TransactionServiceTest {
 
         // Act & Assert
         assertThrows(IllegalArgumentException.class, () -> 
-            transactionService.transfer(UUID.randomUUID().toString(), senderNo, receiverNo, amount)
+            transactionService.initializeTransaction(UUID.randomUUID().toString(), senderNo, receiverNo, amount)
         );
         
         verify(transactionRepository, never()).save(any());
     }
 
-    @Test
-    void transfer_TerminatedAccount_ThrowsException() {
+
+    void initializeTransaction_TerminatedAccount_ThrowsException() {
         // Arrange
         senderAccount.setStatus(AccountStatus.TERMINATED);
         BigDecimal amount = new BigDecimal("100.00");
@@ -120,21 +120,21 @@ class TransactionServiceTest {
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            transactionService.transfer(UUID.randomUUID().toString(), senderNo, receiverNo, amount)
+            transactionService.initializeTransaction(senderNo, receiverNo, amount)
         );
         
         assertTrue(exception.getMessage().contains("terminated account"));
     }
 
-    @Test
-    void transfer_AccountNotFound_ThrowsException() {
+
+    void initializeTransaction_AccountNotFound_ThrowsException() {
         // Arrange
         when(accountRepository.findByAccountNumber(senderNo)).thenReturn(Optional.empty());
         when(idempotencyKeyRepository.findById(any())).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThrows(java.util.NoSuchElementException.class, () ->
-            transactionService.transfer(UUID.randomUUID().toString(), senderNo, receiverNo, new BigDecimal("100.00"))
+            transactionService.initializeTransaction(senderNo, receiverNo, new BigDecimal("100.00"))
         );
     }
 }

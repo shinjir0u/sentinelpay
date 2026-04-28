@@ -6,6 +6,4 @@ public interface IdempotencyKeyService {
 
     IdempotencyKey processExistingIdempotencyKey(String idempotencyKey);
 
-    IdempotencyKey saveIdempotencyKey(IdempotencyKey idempotencyKey);
-
 }

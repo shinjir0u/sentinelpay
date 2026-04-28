@@ -75,6 +75,7 @@
 		<module>transaction</module>
 		<module>rest</module>
 		<module>idempotencykey</module>
+		<module>usecase</module>
 	</modules>
 
 </project>
