@@ -96,4 +96,9 @@ public class TransactionServiceImpl implements TransactionService {
         transactionRepository.save(successTransaction);
     }
 
+    @Override
+    public Transaction saveTransaction(Transaction transaction) {
+        return transactionRepository.save(transaction);
+    }
+
 }
