@@ -25,7 +25,9 @@ public class TransferUseCase {
         if (processedKey != null)
             return processedKey.getResponse();
 
-        return transactionService.initializeTransaction(senderAccountNumber, receiverAccountNumber, amount);
+        String transactionId = transactionService.initializeTransaction(senderAccountNumber, receiverAccountNumber, amount);
+        idempotencyKeyService.saveKey(idempotencyKey, transactionId);
+        return transactionId;
 
     }
 
@@ -36,8 +38,9 @@ public class TransferUseCase {
         if (processedKey != null)
             return processedKey.getResponse();
 
-        return transactionService.finalizeTransaction(transactionId);
-
+        String savedTransactionId = transactionService.finalizeTransaction(transactionId);
+        idempotencyKeyService.saveKey(idempotencyKey, savedTransactionId);
+        return savedTransactionId;
     }
 
 }

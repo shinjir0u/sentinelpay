@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @Service
@@ -27,6 +28,16 @@ public class IdempotencyKeyServiceImpl implements IdempotencyKeyService {
                 return key;
         }
         return null;
+    }
+
+    @Override
+    public IdempotencyKey saveKey(String idempotencyKey, String response) {
+        IdempotencyKey newKey = IdempotencyKey.builder()
+                                .key(idempotencyKey)
+                                .response(response)
+                                .expiryDate(Instant.now().plus(15, ChronoUnit.MINUTES))
+                                .build();
+        return idempotencyKeyRepository.save(newKey);
     }
 
 }
