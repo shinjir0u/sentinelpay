@@ -8,3 +8,8 @@ The app is structured as a multi-module project with each feature as a module fo
 
 Implement the transfer logic between accounts.
 Basic CRUD are skipped as it's redundant for the main purpose of the project is learning.
+
+## Phase 2
+
+Add idempotency keys to further safeguard multiple transactions of the same type.
+Refactor transfer logic to clean code.
