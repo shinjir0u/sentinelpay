@@ -1,8 +1,12 @@
 package com.app.sentinelpay.transaction.service;
 
+import com.app.sentinelpay.account.exception.InsufficientBalanceException;
+import com.app.sentinelpay.account.exception.NoSuchAccountException;
+import com.app.sentinelpay.account.exception.TerminatedAccountException;
 import com.app.sentinelpay.account.model.Account;
 import com.app.sentinelpay.account.repository.AccountRepository;
 import com.app.sentinelpay.idempotencyKey.repository.IdempotencyKeyRepository;
+import com.app.sentinelpay.transaction.exception.NoSuchTransactionException;
 import com.app.sentinelpay.transaction.model.Transaction;
 import com.app.sentinelpay.transaction.model.type.TransactionStatus;
 import com.app.sentinelpay.transaction.repository.TransactionRepository;
@@ -29,14 +33,19 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public String initializeTransaction(String senderAccountNumber, String receiverAccountNumber, BigDecimal amount) {
-        Account senderAccount = accountRepository.findByAccountNumber(senderAccountNumber).orElseThrow();
-        Account receiverAccount = accountRepository.findByAccountNumber(receiverAccountNumber).orElseThrow();
+        Account senderAccount = accountRepository.findByAccountNumber(senderAccountNumber)
+                                                    .orElseThrow(() -> new NoSuchAccountException(senderAccountNumber));
+        Account receiverAccount = accountRepository.findByAccountNumber(receiverAccountNumber)
+                                                    .orElseThrow(() -> new NoSuchAccountException(receiverAccountNumber));
 
-        if (senderAccount.isAccountTerminated() || receiverAccount.isAccountTerminated())
-            throw new RuntimeException("Transaction from or to an terminated account is invalid");
+        if (senderAccount.isAccountTerminated())
+            throw new TerminatedAccountException(senderAccount.getAccountNumber());
+
+        if (receiverAccount.isAccountTerminated())
+            throw new TerminatedAccountException(receiverAccount.getAccountNumber());
 
         if (senderAccount.hasInsufficientBalance(amount))
-            throw new IllegalArgumentException("Insufficient balance: at least 1000 must remain in the account after transaction.");
+            throw new InsufficientBalanceException(senderAccount.getAccountNumber(), amount.toString());
 
         Transaction transaction = Transaction.builder()
                                     .senderAccount(senderAccount)
@@ -52,21 +61,33 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public String finalizeTransaction(String transactionId) {
-        Transaction transaction = transactionRepository.findById(UUID.fromString(transactionId)).orElseThrow();
+        Transaction transaction = transactionRepository.findById(UUID.fromString(transactionId))
+                                                           .orElseThrow(() -> new NoSuchTransactionException(transactionId));
 
-        Account senderAccount = accountRepository.findByAccountNumber(transaction.getSenderAccount().getAccountNumber()).orElseThrow();
-        Account receiverAccount = accountRepository.findByAccountNumber(transaction.getReceiverAccount().getAccountNumber()).orElseThrow();
+        String senderAccountNumber = transaction.getSenderAccount().getAccountNumber();
+        String receiverAccountNumber = transaction.getReceiverAccount().getAccountNumber();
+        BigDecimal transactionAmount = transaction.getAmount();
 
-        if (senderAccount.isAccountTerminated() || receiverAccount.isAccountTerminated())
-            throw new RuntimeException("Transaction from or to an terminated account is invalid");
+        Account senderAccount = accountRepository.findByAccountNumber(senderAccountNumber)
+                                                     .orElseThrow(() -> new NoSuchAccountException(senderAccountNumber));
+        Account receiverAccount = accountRepository.findByAccountNumber(receiverAccountNumber)
+                                                    .orElseThrow(() -> new NoSuchAccountException(receiverAccountNumber));
+
+        if (senderAccount.isAccountTerminated())
+            throw new TerminatedAccountException(senderAccountNumber);
+
+        if (receiverAccount.isAccountTerminated())
+            throw new TerminatedAccountException(receiverAccountNumber);
 
         if (senderAccount.hasInsufficientBalance(transaction.getAmount()))
-            throw new IllegalArgumentException("Insufficient balance: at least 1000 must remain in the account after transaction.");
+            throw new InsufficientBalanceException(senderAccountNumber, transactionAmount.toString());
 
-        senderAccount.subtractBalance(transaction.getAmount());
-        receiverAccount.addBalance(transaction.getAmount());
+        senderAccount.subtractBalance(transactionAmount);
+        receiverAccount.addBalance(transactionAmount);
 
-        Transaction successTransaction = transaction.toBuilder().status(TransactionStatus.SUCCESS).build();
+        Transaction successTransaction = transaction.toBuilder()
+                                            .status(TransactionStatus.SUCCESS)
+                                            .build();
         Transaction savedTransaction = transactionRepository.save(successTransaction);
         return savedTransaction.getId().toString();
     }

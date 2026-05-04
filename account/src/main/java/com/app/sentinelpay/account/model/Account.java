@@ -1,5 +1,7 @@
 package com.app.sentinelpay.account.model;
 
+import com.app.sentinelpay.account.exception.InsufficientBalanceException;
+import com.app.sentinelpay.account.exception.InvalidAmountException;
 import com.app.sentinelpay.account.model.type.AccountStatus;
 import com.app.sentinelpay.user.model.User;
 import jakarta.persistence.*;
@@ -49,17 +51,17 @@ public class Account {
 
     public BigDecimal subtractBalance(BigDecimal amount) {
         if (isInvalidAmount(amount))
-            throw new IllegalArgumentException("Invalid amount: transaction amount must be greater than 0 and have at most 2 decimal places.");
+            throw new InvalidAmountException(amount.toString());
 
         if (hasInsufficientBalance(amount))
-            throw new IllegalArgumentException("Insufficient balance: at least 1000 must remain in the account after transaction.");
+            throw new InsufficientBalanceException(accountNumber, amount.toString());
 
         return balance = balance.subtract(amount);
     }
 
     public BigDecimal addBalance(BigDecimal amount) {
         if (isInvalidAmount(amount))
-            throw new IllegalArgumentException("Invalid amount: transaction amount must be greater than 0 and have at most 2 decimal places.");
+            throw new InvalidAmountException(amount.toString());
 
         return balance = balance.add(amount);
     }
