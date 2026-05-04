@@ -33,13 +33,13 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
-    @Column(name = "transaction_start_date", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
-    private Instant startDate;
+    private Instant createdAt;
 
-    @Column(name = "transaction_end_date", nullable = false)
+    @Column(name = "updated_at", nullable = false)
     @LastModifiedDate
-    private Instant endDate;
+    private Instant updatedAt;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "sender_account_id")
