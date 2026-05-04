@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 
 public interface TransactionService {
 
-    String initializeTransaction(String senderAccountNumber, String receiverAccountNumber, BigDecimal amount) throws InterruptedException;
+    String initializeTransaction(String senderAccountNumber, String receiverAccountNumber, BigDecimal amount);
 
-    String finalizeTransaction(String transactionId) throws InterruptedException;
+    String finalizeTransaction(String transactionId);
 
 }

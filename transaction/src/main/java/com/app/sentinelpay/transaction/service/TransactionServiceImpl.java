@@ -28,7 +28,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final TaskScheduler taskScheduler;
 
     @Override
-    public String initializeTransaction(String senderAccountNumber, String receiverAccountNumber, BigDecimal amount) throws InterruptedException {
+    public String initializeTransaction(String senderAccountNumber, String receiverAccountNumber, BigDecimal amount) {
         Account senderAccount = accountRepository.findByAccountNumber(senderAccountNumber).orElseThrow();
         Account receiverAccount = accountRepository.findByAccountNumber(receiverAccountNumber).orElseThrow();
 
@@ -51,7 +51,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public String finalizeTransaction(String transactionId) throws InterruptedException {
+    public String finalizeTransaction(String transactionId) {
         Transaction transaction = transactionRepository.findById(UUID.fromString(transactionId)).orElseThrow();
 
         Account senderAccount = accountRepository.findByAccountNumber(transaction.getSenderAccount().getAccountNumber()).orElseThrow();
