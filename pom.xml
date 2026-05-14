@@ -49,6 +49,11 @@
 			</dependency>
 			<dependency>
 				<groupId>com.app.sentinelpay</groupId>
+				<artifactId>usecase</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.app.sentinelpay</groupId>
 				<artifactId>common</artifactId>
 				<version>${project.version}</version>
 			</dependency>
