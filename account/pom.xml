@@ -29,5 +29,9 @@
             <groupId>com.app.sentinelpay</groupId>
             <artifactId>user</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.app.sentinelpay</groupId>
+            <artifactId>common</artifactId>
+        </dependency>
     </dependencies>
 </project>

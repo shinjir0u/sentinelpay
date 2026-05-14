@@ -7,17 +7,21 @@ import java.util.Map;
 @Getter
 public abstract class DomainException extends RuntimeException {
 
-    private final String code;
+    private String code;
 
-    private final String message;
+    private String message;
 
-    private final Map<String, String> errorData;
+    private Map<String, String> errorData;
 
-    protected DomainException(String code, String message, Map<String, String> errorData) {
+    protected DomainException(String message) {
         super(message);
+    }
+
+    public void addExceptionInformation(String code, String message, Map<String, String> errorData) {
         this.code = code;
         this.message = message;
         this.errorData = errorData;
     }
+
 
 }

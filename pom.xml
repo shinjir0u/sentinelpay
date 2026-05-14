@@ -47,6 +47,11 @@
 				<artifactId>idempotencykey</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>com.app.sentinelpay</groupId>
+				<artifactId>common</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -76,6 +81,7 @@
 		<module>rest</module>
 		<module>idempotencykey</module>
 		<module>usecase</module>
+		<module>common</module>
 	</modules>
 
 </project>
