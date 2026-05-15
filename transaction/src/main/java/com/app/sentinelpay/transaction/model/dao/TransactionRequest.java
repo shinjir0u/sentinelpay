@@ -1,6 +1,7 @@
 package com.app.sentinelpay.transaction.model.dao;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
@@ -9,6 +10,7 @@ public record TransactionRequest(
         String senderAccountNumber,
         @JsonProperty("receiver_account_number")
         String receiverAccountNumber,
+        @NotNull
         BigDecimal amount
 ) {
 }

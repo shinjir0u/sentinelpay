@@ -42,11 +42,14 @@ public class Account {
     private Integer version;
 
     public boolean hasInsufficientBalance(BigDecimal amount) {
+        if (isInvalidAmount(amount))
+            throw new InvalidAmountException(amount == null ? "null" : amount.toString());
+
         return balance.subtract(amount).compareTo(BigDecimal.valueOf(1000)) < 0;
     }
 
     private boolean isInvalidAmount(BigDecimal amount) {
-        return amount.scale() > 2 || amount.compareTo(BigDecimal.ZERO) <= 0;
+        return amount == null || amount.scale() > 2 || amount.compareTo(BigDecimal.ZERO) <= 0;
     }
 
     public BigDecimal subtractBalance(BigDecimal amount) {
