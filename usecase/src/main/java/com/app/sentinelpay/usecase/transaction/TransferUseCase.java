@@ -18,7 +18,7 @@ public class TransferUseCase {
 
     private final IdempotencyKeyService idempotencyKeyService;
 
-    public String initializeTransfer(String idempotencyKey, String senderAccountNumber, String receiverAccountNumber, BigDecimal amount) throws InterruptedException {
+    public String initializeTransfer(String idempotencyKey, String senderAccountNumber, String receiverAccountNumber, BigDecimal amount) {
 
         IdempotencyKey processedKey = idempotencyKeyService.processExistingIdempotencyKey(idempotencyKey);
 
@@ -31,7 +31,7 @@ public class TransferUseCase {
 
     }
 
-    public String finalizeTransfer(String idempotencyKey, String transactionId) throws InterruptedException {
+    public String finalizeTransfer(String idempotencyKey, String transactionId) {
 
         IdempotencyKey processedKey = idempotencyKeyService.processExistingIdempotencyKey(idempotencyKey);
 

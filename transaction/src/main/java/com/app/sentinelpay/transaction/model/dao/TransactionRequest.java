@@ -10,7 +10,7 @@ public record TransactionRequest(
         String senderAccountNumber,
         @JsonProperty("receiver_account_number")
         String receiverAccountNumber,
-        @NotNull
+        @NotNull(message = "Transaction amount cannot be null")
         BigDecimal amount
 ) {
 }
