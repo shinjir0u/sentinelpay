@@ -7,9 +7,9 @@ import java.util.Map;
 @Getter
 public abstract class DomainException extends RuntimeException {
 
-    private String code;
+    private String errorCode;
 
-    private String message;
+    private String errorMessage;
 
     private Map<String, String> errorData;
 
@@ -17,11 +17,10 @@ public abstract class DomainException extends RuntimeException {
         super(message);
     }
 
-    public void addExceptionInformation(String code, String message, Map<String, String> errorData) {
-        this.code = code;
-        this.message = message;
+    public void addExceptionInformation(String errorCode, String errorMessage, Map<String, String> errorData) {
+        this.errorCode = errorCode;
+        this.errorMessage = errorMessage;
         this.errorData = errorData;
     }
-
 
 }

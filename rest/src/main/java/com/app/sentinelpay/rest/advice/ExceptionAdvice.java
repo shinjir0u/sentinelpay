@@ -14,9 +14,9 @@ public class ExceptionAdvice {
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<Map<String, Object>> handleDomainException(DomainException exception) {
         Map<String, Object> errorMap = new HashMap<>();
-        errorMap.put("code", exception.getCode());
-        errorMap.put("message", exception.getMessage());
-        errorMap.put("data", exception.getErrorData());
+        errorMap.put("code", exception.getErrorCode());
+        errorMap.put("message", exception.getErrorMessage());
+        errorMap.put("error_data", exception.getErrorData());
         return ResponseEntity.badRequest().body(errorMap);
     }
 
